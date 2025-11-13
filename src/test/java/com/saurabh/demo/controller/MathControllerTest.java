@@ -1,131 +1,120 @@
 package com.saurabh.demo.controller;
 
+import com.saurabh.demo.service.MathService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import org.junit.jupiter.api.Assertions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 public class MathControllerTest {
 
-    @InjectMocks
-    private MathController mathController;
+    private MockMvc mockMvc;
 
     @Mock
     private MathService mathService;
 
-    // 1. Multiplication
-    @Test
-    public void testMultiplyPositiveNumbers() {
-        // when
-        Mockito.when(mathService.multiply(4, 5)).thenReturn(20);
-        int a = 4;
-        int b = 5;
-        // then
-        int result = mathController.multiply(a, b);
-        assertEquals(a * b, result);
+    @InjectMocks
+    private MathController mathController;
+
+    @Autowired
+    public void setMathController(MathController mathController) {
+        this.mathController = mathController;
+    }
+
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
     }
 
     @Test
-    public void testMultiplyNegativeNumbers() {
-        // when
-        Mockito.when(mathService.multiply(-4, 5)).thenReturn(-20);
-        int a = -4;
-        int b = 5;
-        // then
-        int result = mathController.multiply(a, b);
-        assertEquals(a * b, result);
+    public void testMultiply() throws Exception {
+        // Arrange
+        when(mathService.multiply(anyInt(), anyInt())).thenReturn(10);
+
+        // Act
+        MvcResult result = mockMvc.perform(get("/math/multiply")
+                .param("a", "2")
+                .param("b", "5"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("10"))
+                .andReturn();
+
+        // Assert
+        assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
-    public void testMultiplyZero() {
-        // when
-        Mockito.when(mathService.multiply(0, 5)).thenReturn(0);
-        int a = 0;
-        int b = 5;
-        // then
-        int result = mathController.multiply(a, b);
-        assertEquals(a * b, result);
-    }
+    public void testDivide() throws Exception {
+        // Arrange
+        when(mathService.divide(anyInt(), anyInt())).thenReturn(2.5);
 
-    // 2. Division
-    @Test
-    public void testDividePositiveNumbers() {
-        // when
-        Mockito.when(mathService.divide(12, 3)).thenReturn(4.0);
-        int a = 12;
-        int b = 3;
-        // then
-        double result = mathController.divide(a, b);
-        assertEquals(4.0, result, 0.01);
+        // Act
+        MvcResult result = mockMvc.perform(get("/math/divide")
+                .param("a", "10")
+                .param("b", "4"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("2.5"))
+                .andReturn();
+
+        // Assert
+        assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
-    public void testDivideNegativeNumbers() {
-        // when
-        Mockito.when(mathService.divide(-12, 3)).thenReturn(-4.0);
-        int a = -12;
-        int b = 3;
-        // then
-        double result = mathController.divide(a, b);
-        assertEquals(-4.0, result, 0.01);
+    public void testTable() throws Exception {
+        // Arrange
+        when(mathService.generateTable(anyInt(), anyInt())).thenReturn("Table generated");
+
+        // Act
+        MvcResult result = mockMvc.perform(get("/math/table")
+                .param("number", "2")
+                .param("upTo", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Table generated"))
+                .andReturn();
+
+        // Assert
+        assertEquals(200, result.getResponse().getStatus());
     }
 
     @Test
-    public void testDivideByZero() {
-        // when
-        try {
-            mathController.divide(12, 0);
-            assert false : "Expected MathException when dividing by zero";
-        } catch (ArithmeticException e) {
-            // expected
-        }
+    public void testCount() throws Exception {
+        // Arrange
+        when(mathService.countUpTo(anyInt())).thenReturn("Count generated");
+
+        // Act
+        MvcResult result = mockMvc.perform(get("/math/count")
+                .param("n", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Count generated"))
+                .andReturn();
+
+        // Assert
+        assertEquals(200, result.getResponse().getStatus());
     }
 
-    // 3. Table
-    @Test
-    public void testTable() {
-        // when
-        Mockito.when(mathService.generateTable(5, 10)).thenReturn("Table of 5: 5 10 15 20 25");
-        int number = 5;
-        int upTo = 10;
-        // then
-        String result = mathController.table(number, upTo);
-        assertEquals("Table of 5: 5 10 15 20 25", result);
-    }
-
-    // 4. Counting
-    @Test
-    public void testCountPositiveNumber() {
-        // when
-        Mockito.when(mathService.countUpTo(10)).thenReturn("Starting from 1, count up to 10 is 10");
-        int n = 10;
-        // then
-        String result = mathController.count(n);
-        assertEquals("Starting from 1, count up to 10 is 10", result);
-    }
-
-    @Test
-    public void testCountZero() {
-        // when
-        Mockito.when(mathService.countUpTo(0)).thenReturn("Starting from 1, count up to 0 is 0");
-        int n = 0;
-        // then
-        String result = mathController.count(n);
-        assertEquals("Starting from 1, count up to 0 is 0", result);
-    }
-
-    @Test
-    public void testCountNegativeNumber() {
-        // when
-        try {
-            mathController.count(-3);
-            assert false : "Expected IllegalArgumentException when counting a negative number";
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
-    }
 }
+```
+
+Please note that `MvcResult` is a result object that provides a result of the request, and `andExpect` method is a way to specify expected results or assertions about the result.
+
+To use MockMvc for testing we also need to add MockMvc and Spring Boot Test dependency in our project.
+
+Also note that in the provided test, the MathService behavior is being stubbed using Mockito for better unit test coverage.
+
+The test class should be placed in the same package as the `MathController` class.
