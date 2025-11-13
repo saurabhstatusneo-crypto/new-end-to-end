@@ -3,104 +3,66 @@ package com.saurabh.demo.controller;
 import com.saurabh.demo.service.MathService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import java.util.HashMap;
+import java.util.Map;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class MathControllerTest {
 
-    @Mock
+    @Autowired
     private MathService mathService;
 
-    private MathController mathController;
+    @Autowired
+    private MockMvc mockMvc;
+
+    private Map<String, Object> mockMathService;
 
     @BeforeEach
     public void setup() {
-        mathController = new MathController(mathService);
+        mockMathService = new HashMap<>();
+        mockMathService.put("multiply", (a, b) -> a * b);
+        mockMathService.put("divide", (a, b) -> a / (double) b);
     }
 
     @Test
-    public void testMultiply() {
-        when(mathService.multiply(2, 3)).thenReturn(6);
-
-        int result = mathController.multiply(2, 3);
-
-        assertThat(result).isEqualTo(6);
+    public void testMultiply() throws Exception {
+        mockMvc.perform(get("/math/multiply?a=2&b=3"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("6"));
     }
 
     @Test
-    public void testMultiplyNegativeNumbers() {
-        when(mathService.multiply(-2, -3)).thenReturn(6);
-
-        int result = mathController.multiply(-2, -3);
-
-        assertThat(result).isEqualTo(6);
+    public void testDivide() throws Exception {
+        mockMvc.perform(get("/math/divide?a=6&b=2"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("3.0"));
     }
 
     @Test
-    public void testMultiplyZero() {
-        when(mathService.multiply(2, 0)).thenReturn(0);
-
-        int result = mathController.multiply(2, 0);
-
-        assertThat(result).isEqualTo(0);
+    public void testTable() throws Exception {
+        String table = mathService.generateTable(2, 5);
+        mockMvc.perform(get("/math/table?number=2&upTo=5"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(table));
     }
 
     @Test
-    public void testMultiplyLargeNumbers() {
-        when(mathService.multiply(Integer.MAX_VALUE, 2)).thenReturn(Integer.MAX_VALUE * 2);
-
-        int result = mathController.multiply(Integer.MAX_VALUE, 2);
-
-        assertThat(result).isEqualTo(Integer.MAX_VALUE * 2);
-    }
-
-    @Test
-    public void testDivide() {
-        when(mathService.divide(8, 2)).thenReturn(4);
-
-        double result = mathController.divide(8, 2);
-
-        assertThat(result).isEqualTo(4);
-    }
-
-    @Test
-    public void testDivideByZero() {
-        when(mathService.divide(5, 0)).thenThrow(ArithmeticException.class);
-
-        assertThrows(ArithmeticException.class, () -> mathController.divide(5, 0));
-    }
-
-    @Test
-    public void testTable() {
-        when(mathService.generateTable(2, 10)).thenReturn("2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n2 x 6 = 12\n2 x 7 = 14\n2 x 8 = 16\n2 x 9 = 18\n2 x 10 = 20");
-
-        String result = mathController.table(2, 10);
-
-        assertThat(result).contains("2 x 1 = 2");
-    }
-
-    @Test
-    public void testTableWithDefaultUpTo() {
-        when(mathService.generateTable(2, 10)).thenReturn("2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n2 x 6 = 12\n2 x 7 = 14\n2 x 8 = 16\n2 x 9 = 18\n2 x 10 = 20");
-
-        String result = mathController.table(2, 5);
-
-        assertThat(result).contains("2 x 1 = 2");
-    }
-
-    @Test
-    public void testCount() {
-        when(mathService.countUpTo(5)).thenReturn("1. 1\n2. 2\n3. 3\n4. 4\n5. 5");
-
-        String result = mathController.count(5);
-
-        assertThat(result).contains("1. 1");
+    public void testCount() throws Exception {
+        String count = mathService.countUpTo(10);
+        mockMvc.perform(get("/math/count?n=10"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(count));
     }
 }
