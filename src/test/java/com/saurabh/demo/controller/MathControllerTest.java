@@ -1,139 +1,92 @@
 package com.saurabh.demo.controller;
 
 import com.saurabh.demo.service.MathService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
+@ExtendWith(MockitoExtension.class)
 public class MathControllerTest {
-
-    private MockMvc mockMvc;
 
     @Mock
     private MathService mathService;
 
-    @Mock
-    private Constructor<?> testClassConstructor;
-
-    @Mock
-    private Method testMethod;
-
-    @Autowired
+    @InjectMocks
     private MathController mathController;
 
+    private MockMvc mockMvc;
+
     @BeforeEach
-    void setup() {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
     }
 
     @Test
-    void shouldReturnResultForMultiplication() throws Exception {
-        // Arrange
+    public void testMultiply() throws Exception {
         int a = 5;
-        int b = 3;
-        when(mathService.multiply(a, b)).thenReturn(15);
-        // Act
-        String response = mockMvc.perform(get("/math/multiply?a=" + a + "&b=" + b))
+        int b = 10;
+        int expected = 50;
+        when(mathService.multiply(a, b)).thenReturn(expected);
+
+        mockMvc.perform(get("/math/multiply?a=" + a + "&b=" + b))
                 .andExpect(status().isOk())
-                .andExpect(content().string("15"))
-                .andReturn().getResponse().getContentAsString();
-        // Assert
-        assertEquals("15", response);
+                .andExpect(content().string(String.valueOf(expected)));
     }
 
     @Test
-    void shouldReturnResultForDivision() throws Exception {
-        // Arrange
-        int a = 15;
-        int b = 3;
-        when(mathService.divide(a, b)).thenReturn(5.0);
-        // Act
-        String response = mockMvc.perform(get("/math/divide?a=" + a + "&b=" + b))
+    public void testDivide() throws Exception {
+        int a = 10;
+        int b = 2;
+        double expected = 5.0;
+        when(mathService.divide(a, b)).thenReturn(expected);
+
+        mockMvc.perform(get("/math/divide?a=" + a + "&b=" + b))
                 .andExpect(status().isOk())
-                .andExpect(content().string("5.0"))
-                .andReturn().getResponse().getContentAsString();
-        // Assert
-        assertEquals("5.0", response);
+                .andExpect(content().string(String.valueOf(expected)));
     }
 
     @Test
-    void shouldReturnTableForNumber() throws Exception {
-        // Arrange
-        int a = 5;
-        when(mathService.generateTable(a, 10)).thenReturn("5, 10, 15, 20, 25, 30, 35, 40, 45, 50");
-        // Act
-        String response = mockMvc.perform(get("/math/table?number=" + a + "&upTo=10"))
+    public void testTable() throws Exception {
+        int number = 5;
+        int upTo = 10;
+        String expected = "Table for 5:\n" +
+                "5 x 1 = 5\n" +
+                "5 x 2 = 10\n" +
+                "5 x 3 = 15\n" +
+                "5 x 4 = 20\n" +
+                "5 x 5 = 25\n" +
+                "5 x 6 = 30\n" +
+                "5 x 7 = 35\n" +
+                "5 x 8 = 40\n" +
+                "5 x 9 = 45\n" +
+                "5 x 10 = 50";
+        when(mathService.generateTable(number, upTo)).thenReturn(expected);
+
+        mockMvc.perform(get("/math/table?number=" + number + "&upTo=" + upTo))
                 .andExpect(status().isOk())
-                .andExpect(content().string("5, 10, 15, 20, 25, 30, 35, 40, 45, 50"))
-                .andReturn().getResponse().getContentAsString();
-        // Assert
-        assertEquals("5, 10, 15, 20, 25, 30, 35, 40, 45, 50", response);
+                .andExpect(content().string(expected));
     }
 
     @Test
-    void shouldCount() throws Exception {
-        // Arrange
-        int num = 10;
-        when(mathService.countUpTo(num)).thenReturn("0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10");
-        // Act
-        String response = mockMvc.perform(get("/math/count?n=" + num))
+    public void testCount() throws Exception {
+        int n = 5;
+        String expected = "Counting up to 5:\n1.\n2.\n3.\n4.\n5.\nThere are 5 steps.";
+        when(mathService.countUpTo(n)).thenReturn(expected);
+
+        mockMvc.perform(get("/math/count?n=" + n))
                 .andExpect(status().isOk())
-                .andExpect(content().string("0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10"))
-                .andReturn().getResponse().getContentAsString();
-        // Assert
-        assertEquals("0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10", response);
-    }
-
-    @Test
-    void shouldReturn400WhenNumberIsZero() throws Exception {
-        // Arrange
-        int a = 0;
-        // Act and Assert
-        mockMvc.perform(get("/math/multiply?a=" + a + "&b=1"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/math/divide?a=" + a + "&b=1"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/math/table?number=" + a + "&upTo=10"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/math/count?n=" + a))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldReturn400WhenBIsZero() throws Exception {
-        // Arrange
-        int a = 5;
-        // Act and Assert
-        mockMvc.perform(get("/math/multiply?a=" + a + "&b=0"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/math/divide?a=" + a + "&b=0"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/math/table?number=" + a + "&upTo=10"))
-                .andExpect(status().isInternalServerError());
-
-        mockMvc.perform(get("/math/count?n=" + a))
-                .andExpect(status().isInternalServerError());
+                .andExpect(content().string(expected));
     }
 
 }

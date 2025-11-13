@@ -1,53 +1,122 @@
 package com.saurabh.demo.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.util.MatcherAssertionError.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.concurrent.TimeoutException;
 
-@SpringBootTest
 public class MathServiceTest {
 
-    @Autowired
-    private MathService mathService;
+    private final MathService mathService = new MathService();
+    private final PrintStream originalOut = System.out;
+    private final ByteArrayOutputStream output = new ByteArrayOutputStream();
+    private final PrintStream newOut = new PrintStream(output);
 
-    @Test
-    void testMultiply() {
-        assertEquals(6, mathService.multiply(3, 2));
+    @BeforeAll
+    public void setUp() {
+        System.setOut(newOut);
+    }
+
+    @AfterAll
+    public void tearDown() {
+        System.setOut(originalOut);
     }
 
     @Test
-    void testDivide() {
-        assertEquals(2.0, mathService.divide(4, 2));
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.divide(4, 0));
-        assertEquals("Division by zero is not allowed", exception.getMessage());
+    public void testMultiply_PositiveNumbers_ReturnsProduct() {
+        // Given
+        int num1 = 5;
+        int num2 = 3;
+
+        // When
+        int result = mathService.multiply(num1, num2);
+
+        // Then
+        assertEquals(num1 * num2, result);
     }
 
     @Test
-    void testGenerateTable() {
-        assertEquals("1 x 1 = 1\n2 x 1 = 2\n3 x 1 = 3\n4 x 1 = 4\n5 x 1 = 5\n6 x 1 = 6\n7 x 1 = 7\n8 x 1 = 8\n9 x 1 = 9\n10 x 1 = 10\n", mathService.generateTable(1, 10));
+    public void testMultiply_Zero_ReturnsZero() {
+        // Given
+        int num1 = 0;
+        int num2 = 3;
+
+        // When
+        int result = mathService.multiply(num1, num2);
+
+        // Then
+        assertEquals(num1 * num2, result);
     }
 
     @Test
-    void testCountUpTo() {
-        assertEquals("1 2 3 4 5 6 7 8 9 10", mathService.countUpTo(10));
+    public void testDivide_PositveNumbers_ReturnsQuotient() {
+        // Given
+        int dividend = 10;
+        int divisor = 2;
+
+        // When
+        double result = mathService.divide(dividend, divisor);
+
+        // Then
+        assertEquals((double) dividend / divisor, result);
     }
 
     @Test
-    void testHelloworld() {
-        assertEquals("hoshiyar", mathService.helloworld());
+    public void testDivide_ByZero_ThrowsIllegalArgumentException() {
+        // Given
+        int dividend = 10;
+        int divisor = 0;
+
+        // When and Then
+        assertThrows(IllegalArgumentException.class, () -> mathService.divide(dividend, divisor));
     }
 
     @Test
-    void testPrintButterfly() {
-        System.out.println("Test printButterfly is being run but it prints something on the console, "
-                + "so this test will only check if the function doesn't throw any exception");
-        try {
-            mathService.printButterfly(5);
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
+    public void testGenerateTable_TableIsValid() {
+        // Given
+        int number = 5;
+        int upTo = 5;
+
+        // When
+        String table = mathService.generateTable(number, upTo);
+
+        // Then
+        String expected = "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n";
+        assertEquals(expected, table);
+    }
+
+    @Test
+    public void testNameCountUpTo_CountIsValid() {
+        // Given
+        int upTo = 5;
+
+        // When
+        String count = mathService.countUpTo(upTo);
+
+        // Then
+        String expected = "1 2 3 4 5";
+        assertEquals(expected, count);
+    }
+
+    @Test
+    public void testhelloworld_ReturnsGivenMessage() {
+        // When
+        String result = mathService.helloworld();
+
+        // Then
+        assertEquals("hoshiyar", result);
+    }
+
+    @Test
+    public void testPrintButterfly_PrintsButterflyShape() {
+        // Given
+        int n = 5;
+
+        // When and Then
+        mathService.printButterfly(n);
+        String expected = " ***** \n **** \n ***  \n **   \n *    \n **** \n ***  \n **   \n *    \n ***** \n";
+        assertEquals(expected, new String(output.toByteArray()));
     }
 }
