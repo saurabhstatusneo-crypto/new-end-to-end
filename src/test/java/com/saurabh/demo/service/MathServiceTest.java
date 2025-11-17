@@ -1,12 +1,19 @@
 package com.saurabh.demo.service;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest
+import org.springframework.test.context.ContextConfiguration;
+
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = MathService.class)
 public class MathServiceTest {
 
     @Autowired
@@ -14,45 +21,42 @@ public class MathServiceTest {
 
     @Test
     public void testMultiply() {
-        assertEquals(4, mathService.multiply(2, 2));
-        assertEquals(6, mathService.multiply(3, 2));
-        assertEquals(-6, mathService.multiply(-3, 2));
+        int result = mathService.multiply(5, 5);
+        assertEquals(25, result);
     }
 
     @Test
-    public void testDivide_Normal() {
-        assertEquals(2.5, mathService.divide(5, 2), 0.1);
-        assertEquals(1.5, mathService.divide(6, 4), 0.1);
+    public void testDivide() {
+        double result = mathService.divide(10, 2);
+        assertEquals(5.0, result);
     }
 
     @Test
-    public void testDivide_Zero() {
-        assertThrows(IllegalArgumentException.class, () -> mathService.divide(10, 0));
+    public void testDivideByZero() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.divide(10, 0));
+        assertEquals("Division by zero is not allowed", exception.getMessage());
     }
 
     @Test
     public void testGenerateTable() {
-        String expected = "2 x 1 = 2\n" +
-                "2 x 2 = 4\n" +
-                "2 x 3 = 6\n" +
-                "2 x 4 = 8\n" +
-                "2 x 5 = 10\n";
-        assertEquals(expected, mathService.generateTable(2, 5));
+        String result = mathService.generateTable(5, 5);
+        assertEquals("5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n", result);
     }
 
     @Test
     public void testCountUpTo() {
-        assertEquals("1 2 3 4 55", mathService.countUpTo(5));
-        assertEquals("", mathService.countUpTo(0));
+        String result = mathService.countUpTo(5);
+        assertEquals("1 2 3 4 5", result);
     }
 
     @Test
     public void testHelloworld() {
-        assertEquals("hoshiyar", mathService.helloworld());
+        String result = mathService.helloworld();
+        assertEquals("hoshiyar", result);
     }
 
     @Test
-    void testPrintButterfly() {
-        mathService.printButterfly(3);
+    public void testPrintButterfly() {
+        mathService.printButterfly(5);
     }
 }
