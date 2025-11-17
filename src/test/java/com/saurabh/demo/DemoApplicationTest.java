@@ -1,23 +1,25 @@
 package com.saurabh.demo;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest
 public class DemoApplicationTests {
 
     @Test
-    void contextLoads() {
-        // Verify that the @SpringBootApplication annotation is present
-        // and that the context loads successfully
-        // In this case there's nothing to test, so this test method is empty
+    public void testMainMethod() {
+        // The main method does not return, hence we cannot use asserts here
+        // Instead we can use a test suite or a testing framework with a "processExit" functionality, but
+        // this is generally not recommended. For our example we assume that everything is fine if the application starts.
+        SpringApplication springApplication = new SpringApplication(DemoApplication.class);
+        int returnCode = springApplication.run(args -> {});
+        assertEquals(0, returnCode);
     }
 
-    @Test
-    void mainMethodShouldRunWithoutException() {
-        // Create a new instance of the SpringApplication class to test the main method
-        // Note: You cannot directly call the main method of the DemoApplication class
-        // from a unit test, since it involves the JVM and cannot be mocked
-        // However, we can ensure that the SpringApplication.run method does not throw any exceptions
-        SpringApplication.run(DemoApplication.class, new String[]{});
-    }
+    // For the sake of example, I'm assuming a static array of "args" for the test method. You should create these variables as instance variables or
+    // make them accessible through another way (like @Autowired) when you need to pass arguments for the 'args' parameter.
+    private static final String[] args = new String[0];
+
 }

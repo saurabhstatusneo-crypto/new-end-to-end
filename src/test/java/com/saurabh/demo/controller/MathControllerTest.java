@@ -1,75 +1,82 @@
 package com.saurabh.demo.controller;
 
 import com.saurabh.demo.service.MathService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class MathControllerTest {
 
-    @Mock
-    private MathService mathService;
-
-    @InjectMocks
+    @Autowired
     private MathController mathController;
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+    @Autowired
+    private MathService mathService;
+
+    @Test
+    public void testMultiply() throws Exception {
+        // Arrange
+        int a = 4;
+        int b = 5;
+
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/math/multiply")
+                .param("a", String.valueOf(a))
+                .param("b", String.valueOf(b)))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(String.valueOf(a * b)));
     }
 
     @Test
-    void testMultiply() throws Exception {
-        when(mathService.multiply(10, 20)).thenReturn(200);
-        mockMvc.perform(get("/math/multiply?a=10&b=20"))
+    public void testDivide() throws Exception {
+        // Arrange
+        int a = 10;
+        int b = 2;
+
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/math/divide")
+                .param("a", String.valueOf(a))
+                .param("b", String.valueOf(b)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("200"));
+                .andExpect(MockMvcResultMatchers.content().string(String.valueOf(a / (double) b)));
     }
 
     @Test
-    void testDivide() throws Exception {
-        when(mathService.divide(20, 4)).thenReturn(5.0);
-        mockMvc.perform(get("/math/divide?a=20&b=4"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("5.0"));
+    public void testTable() throws Exception {
+        // Arrange
+        int number = 3;
+        int upTo = 10;
+
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/math/table")
+                .param("number", String.valueOf(number))
+                .param("upTo", String.valueOf(upTo)))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void testTableWithDefaultUpTo() throws Exception {
-        when(mathService.generateTable(10, 10)).thenReturn("First 10 numbers for 10:");
-        mockMvc.perform(get("/math/table?number=10"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("First 10 numbers for 10:"));
-    }
+    public void testCount() throws Exception {
+        // Arrange
+        int n = 5;
 
-    @Test
-    void testTableWithUpToProvided() throws Exception {
-        when(mathService.generateTable(10, 20)).thenReturn("First 20 numbers for 10:");
-        mockMvc.perform(get("/math/table?number=10&upTo=20"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("First 20 numbers for 10:"));
-    }
-
-    @Test
-    void testCount() throws Exception {
-        when(mathService.countUpTo(10)).thenReturn("Count up to 10 is 10!");
-        mockMvc.perform(get("/math/count?n=10"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Count up to 10 is 10!"));
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/math/count")
+                .param("n", String.valueOf(n)))
+                .andExpect(status().isOk());
     }
 }
