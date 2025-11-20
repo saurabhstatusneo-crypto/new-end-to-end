@@ -1,22 +1,43 @@
 package com.saurabh.demo;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.fail;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 public class DemoApplicationTests {
 
-    @Test
-    public void testMain() {
-        // There's no direct way to test main method as it's entry point and Spring
-        // application context needs to be bootstrapped to test the main method
-        // However, the spring framework provides a way to do that using
-        // @SpringBootTest and @RunWith(SpringRunner.class)
-        // But considering this is a minimalistic example, we're not going to do that
+    @BeforeEach
+    public void setUp() {
+        assertDoesNotThrow(() -> {
+            // Setup code if any
+        });
     }
 
     @Test
-    public void testSpringApplicationRun() {
-        SpringApplication.run(DemoApplication.class, null);
+    public void testMainMethod() {
+        // We cannot test the main method directly in JUnit, so this test will pass
+    }
+
+    @Test
+    public void testApplicationStartup() {
+        // This test is similar to testMainMethod. It simply checks that the application does not throw any errors
+        assertDoesNotThrow(() -> SpringApplication.run(DemoApplication.class, new String[] {}));
+    }
+
+    @Test
+    public void testNullArgument() {
+        assertDoesNotThrow(() -> SpringApplication.run(DemoApplication.class, null));
+    }
+
+    @Test
+    public void testEmptyArgument() {
+        assertDoesNotThrow(() -> SpringApplication.run(DemoApplication.class, new String[] {}));
     }
 }

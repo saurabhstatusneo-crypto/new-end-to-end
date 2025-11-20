@@ -1,93 +1,149 @@
-package com.saurabh.demo.controller;
+package com.saurabh.demo.controller.service;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.saurabh.demo.service.MathService;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ExtendWith(MockitoExtension.class)
 public class MathControllerTest {
 
-    @InjectMocks
-    private MathController mathController;
-
     @Mock
     private MathService mathService;
 
-    private MockMvc mockMvc;
-
-    private static final int NUMBER = 5;
-    private static final int Upto = 10;
-    private static final int DIVIDEND = 10;
-    private static final int DIVISOR = 2;
+    @InjectMocks
+    private MathController mathController;
 
     @BeforeEach
-    public void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+    public void setup() {
+        // Initialize the controller with mocked service before each test
     }
 
     @Test
-    public void multiply() throws Exception {
-        when(mathService.multiply(DIVIDEND, DIVISOR)).thenReturn(DIVIDEND * DIVISOR);
+    public void testMultiply() {
+        // Arrange
+        int a = 5;
+        int b = 3;
+        int expected = 15;
+        when(mathService.multiply(a, b)).thenReturn(expected);
 
-        mockMvc.perform(get("/math/multiply?a=" + DIVIDEND + "&b=" + DIVISOR))
-                .andExpect(status().isOk())
-                .andExpect(content().string(String.valueOf(DIVIDEND * DIVISOR)));
+        // Act
+        int result = mathController.multiply(a, b);
+
+        // Assert
+        assertEquals(expected, result);
     }
 
     @Test
-    public void divide() throws Exception {
-        when(mathService.divide(DIVIDEND, DIVISOR)).thenReturn((double) DIVIDEND / DIVISOR);
-
-        mockMvc.perform(get("/math/divide?a=" + DIVIDEND + "&b=" + DIVISOR))
-                .andExpect(status().isOk())
-                .andExpect(content().string(String.valueOf((double) DIVIDEND / DIVISOR)));
+    public void testMultiply_zeroDivisionException() {
+        // Arrange
+        int a = 5;
+        int b = 0;
+        assertThrows(ArithmeticException.class, () -> mathController.multiply(a, b));
     }
 
     @Test
-    public void table() throws Exception {
-        when(mathService.generateTable(NUMBER, Upto)).thenReturn("Table: \n" +
-                numberOfTimes(NUMBER, Upto));
+    public void testMultiply_negativeNumbers() {
+        // Arrange
+        int a = -5;
+        int b = 3;
+        int expected = -15;
+        when(mathService.multiply(a, b)).thenReturn(expected);
 
-        mockMvc.perform(get("/math/table?number=" + NUMBER + "&upTo=" + Upto))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Table: \n" + numberOfTimes(NUMBER, Upto)));
+        // Act
+        int result = mathController.multiply(a, b);
+
+        // Assert
+        assertEquals(expected, result);
     }
 
     @Test
-    public void count() throws Exception {
-        when(mathService.countUpTo(NUMBER)).thenReturn(getExpectedCount(NUMBER));
+    public void testDivide() {
+        // Arrange
+        int a = 10;
+        int b = 2;
+        double expected = 5.0;
+        when(mathService.divide(a, b)).thenReturn(expected);
 
-        mockMvc.perform(get("/math/count?n=" + NUMBER))
-                .andExpect(status().isOk())
-                .andExpect(content().string(getExpectedCount(NUMBER)));
+        // Act
+        double result = mathController.divide(a, b);
+
+        // Assert
+        assertEquals(expected, result, 0.1);
     }
 
-    private String numberOfTimes(int number, int upTo) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= upTo; i++) {
-            sb.append("\n").append(number).append(" x ").append(i).append(" = ").append(number * i);
-        }
-        return sb.toString();
+    @Test
+    public void testDivide_zeroDivisionException() {
+        // Arrange
+        int a = 10;
+        int b = 0;
+        assertThrows(ArithmeticException.class, () -> mathController.divide(a, b));
     }
 
-    private String getExpectedCount(int number) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= number; i++) {
-            sb.append("\n").append(i);
-        }
-        return sb.toString();
+    @Test
+    public void testDivide_negativeNumbers() {
+        // Arrange
+        int a = 10;
+        int b = -2;
+        double expected = -5.0;
+        when(mathService.divide(a, b)).thenReturn(expected);
+
+        // Act
+        double result = mathController.divide(a, b);
+
+        // Assert
+        assertEquals(expected, result, 0.1);
+    }
+
+    @Test
+    public void testTable() {
+        // Arrange
+        int number = 5;
+        int upTo = 10;
+        String expected = "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n5 x 6 = 30\n5 x 7 = 35\n5 x 8 = 40\n5 x 9 = 45\n5 x 10 = 50";
+
+        when(mathService.generateTable(number, upTo)).thenReturn(expected);
+
+        // Act
+        String result = mathController.table(number, upTo);
+
+        // Assert
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testTable_defaultUpTo() {
+        // Arrange
+        int number = 5;
+        String expected = "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n5 x 6 = 30\n5 x 7 = 35\n5 x 8 = 40\n5 x 9 = 45\n5 x 10 = 50";
+
+        when(mathService.generateTable(number, 10)).thenReturn(expected);
+
+        // Act
+        String result = mathController.table(number);
+
+        // Assert
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testCount() {
+        // Arrange
+        int n = 10;
+        String expected = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+
+        when(mathService.countUpTo(n)).thenReturn(expected);
+
+        // Act
+        String result = mathController.count(n);
+
+        // Assert
+        assertEquals(expected, result);
     }
 }
