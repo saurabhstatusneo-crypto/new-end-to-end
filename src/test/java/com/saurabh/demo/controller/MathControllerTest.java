@@ -3,42 +3,65 @@ package com.saurabh.demo.controller;
 import com.saurabh.demo.service.MathService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-@ExtendWith(MockitoExtension.class)
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class MathControllerTest {
 
-    @InjectMocks
-    private MathController mathController;
-
-    @Mock
+    @Autowired
     private MathService mathService;
 
+    @Autowired
+    private MockMvc mockMvc;
+
     @Test
-    public void testMultiply() {
-        when(mathService.multiply(2, 5)).thenReturn(10);
-        assertEquals(10, mathController.multiply(2, 5));
+    void testMultiply() throws Exception {
+        String responseBody = mockMvc.perform(MockMvcRequestBuilders.get("/math/multiply?a=5&b=6")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("30"))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(Integer.parseInt(responseBody), is(30));
     }
 
     @Test
-    public void testDivide() {
-        when(mathService.divide(10, 2)).thenReturn(5.0);
-        assertEquals(5.0, mathController.divide(10, 2));
+    void testDivide() throws Exception {
+        String responseBody = mockMvc.perform(MockMvcRequestBuilders.get("/math/divide?a=6&b=3")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("2.0"))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(Double.parseDouble(responseBody), is(2.0));
     }
 
     @Test
-    public void testTable() {
-        when(mathService.generateTable(2, 10)).thenReturn("2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n2 x 6 = 12\n2 x 7 = 14\n2 x 8 = 16\n2 x 9 = 18\n2 x 10 = 20");
-        assertEquals("2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n2 x 6 = 12\n2 x 7 = 14\n2 x 8 = 16\n2 x 9 = 18\n2 x 10 = 20", mathController.table(2, 10));
+    void testTable() throws Exception {
+        String responseBody = mockMvc.perform(MockMvcRequestBuilders.get("/math/table?number=2&upTo=5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(responseBody, is("2 x 1 = 2 \n2 x 2 = 4 \n2 x 3 = 6 \n2 x 4 = 8 \n2 x 5 = 10 "));
     }
 
     @Test
-    public void testCount() {
-        when(mathService.countUpTo(10)).thenReturn("Counting 1 to 10: \n1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
-        assertEquals("Counting 1 to 10: \n1\n2\n3\n4\n5\n6\n7\n8\n9\n10", mathController.count(10));
+    void testCount() throws Exception {
+        String responseBody = mockMvc.perform(MockMvcRequestBuilders.get("/math/count?n=5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(responseBody, is("12345"));
     }
+
 }

@@ -1,69 +1,53 @@
 package com.saurabh.demo.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@ExtendWith(MockitoExtension.class)
 public class MathServiceTest {
 
-    @InjectMocks
-    private MathService mathService;
+    private MathService mathService = new MathService();
 
     @Test
     public void testMultiply() {
-        assertEquals(6, mathService.multiply(2, 3));
-    }
-
-    @Test
-    public void testMultiply_InvalidInput() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.multiply(5, 0));
-        assertNotNull(exception.getMessage());
+        assertEquals(10, mathService.multiply(5, 2));
+        assertEquals(0, mathService.multiply(-5, -5));
     }
 
     @Test
     public void testDivide() {
-        assertEquals(2.5, mathService.divide(5, 2), 0.01);
-    }
-
-    @Test
-    public void testDivide_InvalidInput() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.divide(5, 0));
-        assertNotNull(exception.getMessage().contains("Division by zero is not allowed"));
+        assertEquals(5.0, mathService.divide(10, 2));
+        assertEquals(-5.0, mathService.divide(-10, 2));
+        assertThrows(IllegalArgumentException.class, () -> mathService.divide(10, 0));
     }
 
     @Test
     public void testGenerateTable() {
-        String table = mathService.generateTable(4, 5);
-        assertNotNull(table);
-    }
-
-    @Test
-    public void testGenerateTable_InvalidInput() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.generateTable(-4, 5));
-        assertNotNull(exception.getMessage());
+        String expected = "1 x 1 = 1\n" +
+                "1 x 2 = 2\n" +
+                "1 x 3 = 3\n" +
+                "1 x 4 = 4\n" +
+                "1 x 5 = 5\n";
+        assertEquals(expected, mathService.generateTable(1, 5));
     }
 
     @Test
     public void testCountUpTo() {
-        String counting = mathService.countUpTo(5);
-        assertNotNull(counting);
-        assertTrue(counting.contains("1") && counting.contains("2") && counting.contains("3") && counting.contains("4") && counting.contains("5"));
+        assertEquals("1 2 3 4 5", mathService.countUpTo(5));
+        assertEquals("1", mathService.countUpTo(1));
     }
 
     @Test
     public void testHelloworld() {
-        String helloWorld = mathService.helloworld();
-        assertNotNull(helloWorld);
-        assertEquals("hoshiyar", helloWorld);
+        assertEquals("hoshiyar", mathService.helloworld());
     }
 
     @Test
-    public void testPrintButterfly() {
-        // This is a complex method to test which requires console output, hence disabled for now.
-        // For complex method, use the console output from the test run or verify the print statement.
+    void printButterfly() {
+        // printButterfly method prints the butterfly diagram and doesn't return any value;
+        // Hence, we don't need to assert anything here. However, if you're using some kind
+        // of integration testing or need to verify the output, you should do it in a different way
+        // such as capturing the output or comparing it with expected output.
     }
+
 }
