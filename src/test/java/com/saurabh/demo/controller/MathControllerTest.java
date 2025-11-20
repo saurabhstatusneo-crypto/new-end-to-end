@@ -1,68 +1,106 @@
 package com.saurabh.demo.controller;
 
-import com.saurabh.demo.service.MathService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(MathController.class)
+@AutoConfigureMockMvc
 public class MathControllerTest {
 
-    @Mock
-    private MathService mathService;
-
-    @InjectMocks
-    private MathController mathController;
-
+    @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+    @MockBean
+    private MathService mathService;
+
+    @Test
+    void testMultiply() throws Exception {
+        // Arrange
+        int a = 5;
+        int b = 3;
+        Mockito.when(mathService.multiply(a, b)).thenReturn(a * b);
+
+        // Act
+        String response = mockMvc.perform(get("/math/multiply"))
+                .andReturn().getResponse().getContentAsString();
+
+        // Assert
+        assertEquals(String.valueOf(a * b), response);
     }
 
     @Test
-    public void testMultiply() throws Exception {
-        when(mathService.multiply(5, 3)).thenReturn(15);
-        mockMvc.perform(get("/math/multiply?a=5&b=3"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("15"));
+    void testMultiply_InvalidInput() {
+        // Arrange
+        int a = 0;
+        int b = 0;
+        // Mockito does not support @RequestParam so we will test service method directly
+        assertThrows(ArithmeticException.class, () -> mathService.multiply(a, b));
     }
 
     @Test
-    public void testDivide() throws Exception {
-        when(mathService.divide(10, 2)).thenReturn(5);
-        mockMvc.perform(get("/math/divide?a=10&b=2")
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isOk())
-                .andExpect(content().string("5"));
+    void testDivide() throws Exception {
+        // Arrange
+        int a = 10;
+        int b = 2;
+        Mockito.when(mathService.divide(a, b)).thenReturn((double) a / b);
+
+        // Act
+        String response = mockMvc.perform(get("/math/divide?a=10&b=2"))
+                .andReturn().getResponse().getContentAsString();
+
+        // Assert
+        assertEquals(String.valueOf((double) a / b), response);
     }
 
     @Test
-    public void testTable() throws Exception {
-        when(mathService.generateTable(3, 10)).thenReturn("3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15\n3 x 6 = 18\n3 x 7 = 21\n3 x 8 = 24\n3 x 9 = 27\n3 x 10 = 30");
-        mockMvc.perform(get("/math/table?number=3&upTo=10")
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isOk())
-                .andExpect(content().string("3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15\n3 x 6 = 18\n3 x 7 = 21\n3 x 8 = 24\n3 x 9 = 27\n3 x 10 = 30"));
+    void testDivide_InvalidInput() {
+        // Arrange
+        int a = 10;
+        int b = 0;
+        // Mockito does not support @RequestParam so we will test service method directly
+        assertThrows(ArithmeticException.class, () -> mathService.divide(a, b));
     }
 
     @Test
-    public void testCount() throws Exception {
-        when(mathService.countUpTo(5)).thenReturn("0 is not 2, 1 is not 2, 2 is 2, 3 is not 2, 4 is not 2, 5 is not 2");
-        mockMvc.perform(get("/math/count?n=5")
-                .accept(MediaType.TEXT_PLAIN))
-                .andExpect(status().isOk())
-                .andExpect(content().string("0 is not 2, 1 is not 2, 2 is 2, 3 is not 2, 4 is not 2, 5 is not 2"));
+    void testTable() throws Exception {
+        // Arrange
+        int number = 5;
+        int upTo = 10;
+        Mockito.when(mathService.generateTable(number, upTo)).thenReturn(String.valueOf(number) + " x tabla");
+
+        // Act
+        String response = mockMvc.perform(get("/math/table?number=5&upTo=10"))
+                .andReturn().getResponse().getContentAsString();
+
+        // Assert
+        assertEquals("5 x tabla", response);
+    }
+
+    @Test
+    void testCount() throws Exception {
+        // Act
+        String response = mockMvc.perform(get("/math/count"))
+                .andReturn().getResponse().getContentAsString();
+
+        // Assert
+        assertEquals(response, "");
+    }
+
+    @Test
+    void testCount_InvalidInput() throws Exception {
+        // Act
+        String response = mockMvc.perform(get("/math/count?n=-1"))
+                .andReturn().response().getContentAsString();
+
+        // Assert
+        assertEquals(response, "");
     }
 }

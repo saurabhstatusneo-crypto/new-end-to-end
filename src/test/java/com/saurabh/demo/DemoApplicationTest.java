@@ -1,26 +1,22 @@
 package com.saurabh.demo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+public class DemoApplicationTests {
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-class DemoApplicationTest {
-    
     @Test
-    public void testMain() {
+    void testMain() {
         DemoApplication.main(new String[]{});
-        // No assertions needed for main method
+        assertDoesNotThrow(() -> {
+            DemoApplication.main(new String[]{});
+        });
     }
 
     @Test
-    public void testSpringApplicationRun() {
-        SpringApplication.run(DemoApplication.class, new String[]{});
-        // No assertions needed as SpringApplication.run does not return an object
+    void testSpringApplication() {
+        assertDoesNotThrow(() -> SpringApplication.run(DemoApplication.class, new String[]{}));
     }
+
 }
