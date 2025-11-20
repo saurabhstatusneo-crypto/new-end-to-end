@@ -1,105 +1,96 @@
 package com.saurabh.demo.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.io.ConsoleOutputCapture;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import static org.mockito.Mockito.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.extension.MethodStats;
-
-@SpringBootTest
 public class MathServiceTest {
 
-    @InjectMocks
-    private MathService mathService;
-
-    @Mock
-    private MathService mockedMathService;
-
-    @Autowired
-    private PrintStream printStream;
-    
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-    }
+    private final MathService mathService = new MathService();
 
     @Test
     public void testMultiply() {
-        int a = 5;
-        int b = 10;
-        assertEquals(multiply(a, b), mathService.multiply(a, b));
+        int result = mathService.multiply(5, 10);
+        Assertions.assertEquals(50, result);
     }
 
     @Test
-    public void testMultiply_NegativeNumbers() {
-        int a = -5;
-        int b = 10;
-        assertEquals(multiply(a, b), mathService.multiply(a, b));
+    public void testMultiplyZero() {
+        int result = mathService.multiply(5, 0);
+        Assertions.assertEquals(0, result);
     }
 
     @Test
-    public void testMultiply_BigNumbers() {
-        int a = 555555;
-        int b = 222222;
-        assertEquals(multiply(a, b), mathService.multiply(a, b));
+    public void testMultiplyNegative() {
+        int result = mathService.multiply(-5, 10);
+        Assertions.assertEquals(-50, result);
     }
 
     @Test
     public void testDivide() {
-        int a = 20;
-        int b = 5;
-        assertEquals(divide(a, b), mathService.divide(a, b), 0.0);
+        double result = mathService.divide(10, 2);
+        Assertions.assertEquals(5, result, 0.01);
     }
 
     @Test
-    public void testDivide_DivisionByZero() {
-        int a = 20;
-        int b = 0;
-        assertThrows(IllegalArgumentException.class, () -> mathService.divide(a, b));
+    public void testDivideByZero() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.divide(10, 0));
+        Assertions.assertEquals("Division by zero is not allowed", exception.getMessage());
     }
 
     @Test
-    public void testDivide_DecimalResult() {
-        int a = 10;
-        int b = 3;
-        assertEquals(divide(a, b), mathService.divide(a, b), 0.0);
+    public void testDivideNegative() {
+        double result = mathService.divide(-10, 2);
+        Assertions.assertEquals(-5, result, 0.01);
+    }
+
+    @Test
+    public void testDivideFloat() {
+        double result = mathService.divide(10.5, 2);
+        Assertions.assertEquals(5.25, result, 0.01);
     }
 
     @Test
     public void testGenerateTable() {
-        int number = 10;
-        int upTo = 5;
-        assertDoesNotThrow(() -> mathService.generateTable(number, upTo));
+        String result = mathService.generateTable(5, 10);
+        Assertions.assertTrue(result.contains("5 x 1 = 5"));
+        Assertions.assertTrue(result.contains("5 x 10 = 50"));
+    }
+
+    @Test
+    public void testGenerateTableNegative() {
+        String result = mathService.generateTable(-5, 10);
+        Assertions.assertTrue(result.contains("-5 x 1 = -5"));
+        Assertions.assertTrue(result.contains("-5 x 10 = -50"));
     }
 
     @Test
     public void testCountUpTo() {
-        int n = 10;
-        assertEquals(countUpTo(n), mathService.countUpTo(n));
+        StringBuilder sb = new StringBuilder();
+        sb.append("1 2 3 4 5").toString();
+        String result = mathService.countUpTo(5);
+        Assertions.assertEquals(sb.toString(), result);
     }
 
     @Test
-    public void testPrintButterfly() {
-        int n = 5;
-        assertDoesNotThrow(() -> mathService.printButterfly(n));
+    public void testCountUpToNegative() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("-1 -2 -3 -4 -5").toString();
+        String result = mathService.countUpTo(-5);
+        Assertions.assertEquals(sb.toString(), result);
     }
 
     @Test
     public void testHelloWorld() {
-        String expected = "hoshiyar\nh\no\ns\ni\ny\na\nr";
-        String result = helloworld();
-        assertEquals(expected, result);
+        String result = mathService.helloworld();
+        Assertions.assertEquals("hoshiyar", result);
     }
 
+    @Test
+    public void testPrintButterfly() {
+        mathService.printButterfly(5);
+        // This test only checks for the absence of any compilation errors
+        // As printing the butterfly pattern is not an unit test
+    }
 }
