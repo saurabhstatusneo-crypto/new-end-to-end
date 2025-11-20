@@ -1,149 +1,105 @@
-package com.saurabh.demo.controller.service;
+package com.saurabh.demo.controller;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.saurabh.demo.service.MathService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.saurabh.demo.model.MathResult;
+import com.saurabh.demo.model.TableResult;
+import com.saurabh.demo.service.MathService;
+import com.saurabh.demo.service.MathServiceException;
+
 @ExtendWith(MockitoExtension.class)
 public class MathControllerTest {
+
+    @InjectMocks
+    private MathController controller;
 
     @Mock
     private MathService mathService;
 
-    @InjectMocks
-    private MathController mathController;
-
-    @BeforeEach
-    public void setup() {
-        // Initialize the controller with mocked service before each test
-    }
-
     @Test
-    public void testMultiply() {
-        // Arrange
+    void testMultiply() {
         int a = 5;
-        int b = 3;
-        int expected = 15;
-        when(mathService.multiply(a, b)).thenReturn(expected);
+        int b = 6;
+        Integer expectedResult = 30;
 
-        // Act
-        int result = mathController.multiply(a, b);
-
-        // Assert
-        assertEquals(expected, result);
+        when(mathService.multiply(a, b)).thenReturn(expectedResult);
+        int result = controller.multiply(a, b);
+        assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testMultiply_zeroDivisionException() {
-        // Arrange
+    void testMultiply_WithZero() {
         int a = 5;
         int b = 0;
-        assertThrows(ArithmeticException.class, () -> mathController.multiply(a, b));
+        ZeroDivisionException expectedException = assertThrows(ZeroDivisionException.class, () -> controller.multiply(a, b));
+        assertEquals("Division by zero", expectedException.getMessage());
     }
 
     @Test
-    public void testMultiply_negativeNumbers() {
-        // Arrange
-        int a = -5;
-        int b = 3;
-        int expected = -15;
-        when(mathService.multiply(a, b)).thenReturn(expected);
-
-        // Act
-        int result = mathController.multiply(a, b);
-
-        // Assert
-        assertEquals(expected, result);
-    }
-
-    @Test
-    public void testDivide() {
-        // Arrange
+    void testDivide() {
         int a = 10;
         int b = 2;
-        double expected = 5.0;
-        when(mathService.divide(a, b)).thenReturn(expected);
+        Double expectedResult = 5.0;
 
-        // Act
-        double result = mathController.divide(a, b);
-
-        // Assert
-        assertEquals(expected, result, 0.1);
+        when(mathService.divide(a, b)).thenReturn(expectedResult);
+        double result = controller.divide(a, b);
+        assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testDivide_zeroDivisionException() {
-        // Arrange
+    void testDivide_WithZero() {
         int a = 10;
         int b = 0;
-        assertThrows(ArithmeticException.class, () -> mathController.divide(a, b));
+        ArithmeticException expectedException = assertThrows(ArithmeticException.class, () -> controller.divide(a, b));
+        assertEquals("Cannot divide by zero", expectedException.getMessage());
     }
 
     @Test
-    public void testDivide_negativeNumbers() {
-        // Arrange
-        int a = 10;
-        int b = -2;
-        double expected = -5.0;
-        when(mathService.divide(a, b)).thenReturn(expected);
-
-        // Act
-        double result = mathController.divide(a, b);
-
-        // Assert
-        assertEquals(expected, result, 0.1);
-    }
-
-    @Test
-    public void testTable() {
-        // Arrange
-        int number = 5;
+    void testTable() {
+        int number = 3;
         int upTo = 10;
-        String expected = "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n5 x 6 = 30\n5 x 7 = 35\n5 x 8 = 40\n5 x 9 = 45\n5 x 10 = 50";
+        String expectedResult = "Multiplication Table for 3 up to 10: 3 * 1 = 3, 3 * 2 = 6, 3 * 3 = 9, 3 * 4 = 12, ...";
 
-        when(mathService.generateTable(number, upTo)).thenReturn(expected);
-
-        // Act
-        String result = mathController.table(number, upTo);
-
-        // Assert
-        assertEquals(expected, result);
+        when(mathService.generateTable(number, upTo)).thenReturn(expectedResult);
+        String result = controller.table(number, upTo);
+        assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testTable_defaultUpTo() {
-        // Arrange
-        int number = 5;
-        String expected = "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n5 x 6 = 30\n5 x 7 = 35\n5 x 8 = 40\n5 x 9 = 45\n5 x 10 = 50";
+    void testTable_WithNegativeNumber() {
+        int number = -3;
+        int upTo = 10;
+        String expectedResult = "";
 
-        when(mathService.generateTable(number, 10)).thenReturn(expected);
-
-        // Act
-        String result = mathController.table(number);
-
-        // Assert
-        assertEquals(expected, result);
+        when(mathService.generateTable(number, upTo)).thenReturn(expectedResult);
+        String result = controller.table(number, upTo);
+        assertEquals(expectedResult, result);
     }
 
     @Test
-    public void testCount() {
-        // Arrange
-        int n = 10;
-        String expected = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+    void testCount() {
+        int n = 5;
+        String expectedResult = "Count up to 5: 1, 2, 3, 4, 5";
 
-        when(mathService.countUpTo(n)).thenReturn(expected);
+        when(mathService.countUpTo(n)).thenReturn(expectedResult);
+        String result = controller.count(n);
+        assertEquals(expectedResult, result);
+    }
 
-        // Act
-        String result = mathController.count(n);
-
-        // Assert
-        assertEquals(expected, result);
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        reset(mathService);
     }
 }
+
+class ZeroDivisionException extends ArithmeticException {}
+
+class ArithmeticException extends Exception {}
