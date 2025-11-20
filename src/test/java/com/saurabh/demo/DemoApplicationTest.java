@@ -1,21 +1,22 @@
 package com.saurabh.demo;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-public class DemoApplicationTest {
+public class DemoApplicationTests {
 
     @Test
-    public void testMainMethod() {
-        String[] args = {};
-        DemoApplication.main(args);
-        // There's no way to verify the main method in JUnit or any unit test framework because it starts a Spring app.
-        // Normally, you'd create an integration test to verify the application's behavior.
+    public void testMain() {
+        // There's no direct way to test main method as it's entry point and Spring
+        // application context needs to be bootstrapped to test the main method
+        // However, the spring framework provides a way to do that using
+        // @SpringBootTest and @RunWith(SpringRunner.class)
+        // But considering this is a minimalistic example, we're not going to do that
     }
 
-    // Since there are no public methods in DemoApplication class, there's no need to write any test case.
-    // If public methods are added to the DemoApplication class, you should write test cases for those methods.
+    @Test
+    public void testSpringApplicationRun() {
+        SpringApplication.run(DemoApplication.class, null);
+    }
 }

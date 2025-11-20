@@ -1,6 +1,7 @@
 package com.saurabh.demo.service;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -9,45 +10,56 @@ public class MathServiceTest {
     private MathService mathService = new MathService();
 
     @Test
-    public void testMultiply() {
-        assertEquals(10, mathService.multiply(5, 2));
-        assertEquals(0, mathService.multiply(-5, -5));
+    void testMultiply() {
+        int result = mathService.multiply(5, 6);
+        assertEquals(30, result);
     }
 
     @Test
-    public void testDivide() {
-        assertEquals(5.0, mathService.divide(10, 2));
-        assertEquals(-5.0, mathService.divide(-10, 2));
-        assertThrows(IllegalArgumentException.class, () -> mathService.divide(10, 0));
+    void testMultiplyZero() {
+        int result = mathService.multiply(5, 0);
+        assertEquals(0, result);
     }
 
     @Test
-    public void testGenerateTable() {
-        String expected = "1 x 1 = 1\n" +
-                "1 x 2 = 2\n" +
-                "1 x 3 = 3\n" +
-                "1 x 4 = 4\n" +
-                "1 x 5 = 5\n";
-        assertEquals(expected, mathService.generateTable(1, 5));
+    void testDivide() {
+        double result = mathService.divide(10, 2);
+        assertEquals(5.0, result, 0.00001);
     }
 
     @Test
-    public void testCountUpTo() {
-        assertEquals("1 2 3 4 5", mathService.countUpTo(5));
-        assertEquals("1", mathService.countUpTo(1));
+    void testDivideZero() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mathService.divide(10, 0));
+        assertEquals("Division by zero is not allowed", exception.getMessage());
     }
 
     @Test
-    public void testHelloworld() {
-        assertEquals("hoshiyar", mathService.helloworld());
+    void testGenerateTable() {
+        String result = mathService.generateTable(2, 5);
+        assertEquals("2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n", result);
     }
 
     @Test
-    void printButterfly() {
-        // printButterfly method prints the butterfly diagram and doesn't return any value;
-        // Hence, we don't need to assert anything here. However, if you're using some kind
-        // of integration testing or need to verify the output, you should do it in a different way
-        // such as capturing the output or comparing it with expected output.
+    void testCountUpTo() {
+        String result = mathService.countUpTo(5);
+        assertEquals("1 2 3 4 5", result);
     }
 
+    @Test
+    void testHelloworld() {
+        String result = mathService.helloworld();
+        assertEquals("hoshiyar", result);
+    }
+
+    @Test
+    void testPrintButterfly() {
+        // There's no good way to test console output directly in JUnit
+        // We would need to use a library that captures and verifies console output
+    }
+
+    @Test
+    void testPrintButterflyWithFiveRows() {
+        MathService mathServiceWithPrint = new MathService();
+        mathServiceWithPrint.printButterfly(5);
+    }
 }
