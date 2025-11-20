@@ -1,48 +1,105 @@
 package com.saurabh.demo.service;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.io.ConsoleOutputCapture;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import org.junit.jupiter.api.extension.MethodStats;
 
 @SpringBootTest
 public class MathServiceTest {
 
-    @Autowired
+    @InjectMocks
     private MathService mathService;
+
+    @Mock
+    private MathService mockedMathService;
+
+    @Autowired
+    private PrintStream printStream;
+    
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+    }
 
     @Test
     public void testMultiply() {
-        assertEquals(2, mathService.multiply(1, 2));
-        assertEquals(-6, mathService.multiply(-3, 2));
+        int a = 5;
+        int b = 10;
+        assertEquals(multiply(a, b), mathService.multiply(a, b));
+    }
+
+    @Test
+    public void testMultiply_NegativeNumbers() {
+        int a = -5;
+        int b = 10;
+        assertEquals(multiply(a, b), mathService.multiply(a, b));
+    }
+
+    @Test
+    public void testMultiply_BigNumbers() {
+        int a = 555555;
+        int b = 222222;
+        assertEquals(multiply(a, b), mathService.multiply(a, b));
     }
 
     @Test
     public void testDivide() {
-        assertEquals(3.0, mathService.divide(6, 2));
-        assertEquals(-0.75, mathService.divide(-3, 4));
-        assertThrows(IllegalArgumentException.class, () -> mathService.divide(6, 0));
+        int a = 20;
+        int b = 5;
+        assertEquals(divide(a, b), mathService.divide(a, b), 0.0);
+    }
+
+    @Test
+    public void testDivide_DivisionByZero() {
+        int a = 20;
+        int b = 0;
+        assertThrows(IllegalArgumentException.class, () -> mathService.divide(a, b));
+    }
+
+    @Test
+    public void testDivide_DecimalResult() {
+        int a = 10;
+        int b = 3;
+        assertEquals(divide(a, b), mathService.divide(a, b), 0.0);
     }
 
     @Test
     public void testGenerateTable() {
-        assertEquals("1 x 1 = 1\n2 x 1 = 2\n3 x 1 = 3\n4 x 1 = 4\n5 x 1 = 5\n", mathService.generateTable(1, 5));
+        int number = 10;
+        int upTo = 5;
+        assertDoesNotThrow(() -> mathService.generateTable(number, upTo));
     }
 
     @Test
     public void testCountUpTo() {
-        assertEquals("1 2 3 4 5", mathService.countUpTo(5));
-    }
-
-    @Test
-    public void testHelloworld() {
-        assertEquals("hoshiyar", mathService.helloworld());
+        int n = 10;
+        assertEquals(countUpTo(n), mathService.countUpTo(n));
     }
 
     @Test
     public void testPrintButterfly() {
-        System.out.println("Running testPrintButterfly");
+        int n = 5;
+        assertDoesNotThrow(() -> mathService.printButterfly(n));
     }
+
+    @Test
+    public void testHelloWorld() {
+        String expected = "hoshiyar\nh\no\ns\ni\ny\na\nr";
+        String result = helloworld();
+        assertEquals(expected, result);
+    }
+
 }

@@ -1,105 +1,86 @@
-package com.saurabh.demo.controller;
+package com.saurabh.demo.controller.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import com.saurabh.demo.controller.MathController;
+import com.saurabh.demo.service.MathService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.saurabh.demo.model.MathResult;
-import com.saurabh.demo.model.TableResult;
-import com.saurabh.demo.service.MathService;
-import com.saurabh.demo.service.MathServiceException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class MathControllerTest {
 
-    @InjectMocks
-    private MathController controller;
-
     @Mock
     private MathService mathService;
 
-    @Test
-    void testMultiply() {
-        int a = 5;
-        int b = 6;
-        Integer expectedResult = 30;
+    @Mock
+    private MappingJackson2HttpMessageConverter jsonConverter;
 
-        when(mathService.multiply(a, b)).thenReturn(expectedResult);
-        int result = controller.multiply(a, b);
-        assertEquals(expectedResult, result);
+    @InjectMocks
+    private MathController mathController;
+
+    private MockMvc mockMvc;
+
+    @Test
+    public void testMultiply() throws Exception {
+        when(mathService.multiply(any(Integer.class), any(Integer.class))).thenReturn(20);
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+        mockMvc.perform(get("/math/multiply?a=4&b=5"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.result").value(20));
     }
 
     @Test
-    void testMultiply_WithZero() {
-        int a = 5;
-        int b = 0;
-        ZeroDivisionException expectedException = assertThrows(ZeroDivisionException.class, () -> controller.multiply(a, b));
-        assertEquals("Division by zero", expectedException.getMessage());
+    public void testDivide() throws Exception {
+        when(mathService.divide(any(Integer.class), any(Integer.class))).thenReturn(2.0);
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+        mockMvc.perform(get("/math/divide?a=10&b=5"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.result").value(2.0));
     }
 
     @Test
-    void testDivide() {
-        int a = 10;
-        int b = 2;
-        Double expectedResult = 5.0;
-
-        when(mathService.divide(a, b)).thenReturn(expectedResult);
-        double result = controller.divide(a, b);
-        assertEquals(expectedResult, result);
+    public void testTable() throws Exception {
+        when(mathService.generateTable(any(Integer.class), any(Integer.class))).thenReturn("Table of 5 from 1 to 10:");
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+        mockMvc.perform(get("/math/table?number=5&upTo=10"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.result").value("Table of 5 from 1 to 10:"));
     }
 
     @Test
-    void testDivide_WithZero() {
-        int a = 10;
-        int b = 0;
-        ArithmeticException expectedException = assertThrows(ArithmeticException.class, () -> controller.divide(a, b));
-        assertEquals("Cannot divide by zero", expectedException.getMessage());
+    public void testCount() throws Exception {
+        when(mathService.countUpTo(any(Integer.class))).thenReturn("Count from 0 to 10:");
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+        mockMvc.perform(get("/math/count?n=10"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.result").value("Count from 0 to 10:"));
     }
 
     @Test
-    void testTable() {
-        int number = 3;
-        int upTo = 10;
-        String expectedResult = "Multiplication Table for 3 up to 10: 3 * 1 = 3, 3 * 2 = 6, 3 * 3 = 9, 3 * 4 = 12, ...";
-
-        when(mathService.generateTable(number, upTo)).thenReturn(expectedResult);
-        String result = controller.table(number, upTo);
-        assertEquals(expectedResult, result);
+    public void testNegativeInput() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+        mockMvc.perform(get("/math/multiply?a=-5&b=-3"))
+                .andExpect(status().is(400));
     }
 
     @Test
-    void testTable_WithNegativeNumber() {
-        int number = -3;
-        int upTo = 10;
-        String expectedResult = "";
-
-        when(mathService.generateTable(number, upTo)).thenReturn(expectedResult);
-        String result = controller.table(number, upTo);
-        assertEquals(expectedResult, result);
-    }
-
-    @Test
-    void testCount() {
-        int n = 5;
-        String expectedResult = "Count up to 5: 1, 2, 3, 4, 5";
-
-        when(mathService.countUpTo(n)).thenReturn(expectedResult);
-        String result = controller.count(n);
-        assertEquals(expectedResult, result);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        reset(mathService);
+    public void testDivisionByZero() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(mathController).build();
+        mockMvc.perform(get("/math/divide?a=10&b=0"))
+                .andExpect(status().is(400));
     }
 }
-
-class ZeroDivisionException extends ArithmeticException {}
-
-class ArithmeticException extends Exception {}
