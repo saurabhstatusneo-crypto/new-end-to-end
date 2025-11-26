@@ -51,7 +51,7 @@ HUSKY_SKIP_INSTALL = "0"
                     git clean -fd || true
 
                     echo "Setting authenticated origin URL..."
-                    git remote set-url origin "https://saurabhstatusneo-crypto:${GITHUB_TOKEN}@github.com/saurabhstatusneo-crypto/app-java-ai-test-001.git"
+                    git remote set-url origin "${REPO_URL}"
 
                     echo "Fetching remote branches…"
                     git fetch origin --prune
