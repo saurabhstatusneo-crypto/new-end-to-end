@@ -1,18 +1,16 @@
 pipeline {
     agent any
-
-    environment {
-        GROQ_API_KEY = credentials('GROQ_API_KEY')
-        GITHUB_TOKEN = credentials('GITHUB_TOKEN')
-SOURCE_BRANCH = "node"
-TARGET_BRANCH = "ai-tests"
-JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home"
-MAVEN_HOME = "/usr/local/opt/maven"
-PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${PATH}"
-REPO_URL = "https://saurabhstatusneo-crypto:${GITHUB_TOKEN}@github.com/saurabhstatusneo-crypto/new-end-to-end.git"
-HUSKY_SKIP_INSTALL = "0"
-    }
-
+environment {
+    GROQ_API_KEY = credentials('GROQ_API_KEY')
+    GITHUB_TOKEN = credentials('GITHUB_TOKEN')
+    SOURCE_BRANCH = "node"
+    TARGET_BRANCH = "ai-tests"
+    JAVA_HOME = "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home"
+    MAVEN_HOME = "/usr/local/opt/maven"
+    PATH = "$PATH:${MAVEN_HOME}/bin:${JAVA_HOME}/bin"
+    REPO_URL = "https://saurabhstatusneo-crypto:${GITHUB_TOKEN}@github.com/saurabhstatusneo-crypto/new-end-to-end.git"
+    HUSKY_SKIP_INSTALL = "0"
+}
     stages {
 
         /* -----------------------------
